@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #define F_UNSAFE 0x80
 
@@ -15,9 +16,11 @@ static uint32_t read_u32le(const uint8_t *p) {
 }
 
 static void crash_tag(const char *tag) {
-    write(2, "CRASH TAG=", 10);
-    write(2, tag, strlen(tag));
-    write(2, "\n", 1);
+    ssize_t _r;
+    _r = write(2, "CRASH TAG=", 10);
+    _r = write(2, tag, strlen(tag));
+    _r = write(2, "\n", 1);
+    (void)_r;
 }
 
 /* =========================
