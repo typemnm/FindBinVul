@@ -25,16 +25,14 @@ static int read_file(const char *path, uint8_t **out_buf, size_t *out_size) {
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        fprintf(stderr, "Usage: %s <input.bin>
-", argv[0]);
+        fprintf(stderr, "Usage: %s <input.bin>\n", argv[0]);
         return 2;
     }
 
     uint8_t *buf = NULL;
     size_t size = 0;
     if (read_file(argv[1], &buf, &size) != 0) {
-        fprintf(stderr, "Failed to read file: %s
-", argv[1]);
+        fprintf(stderr, "Failed to read file: %s\n", argv[1]);
         return 2;
     }
 
