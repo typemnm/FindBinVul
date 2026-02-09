@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>TLV Fuzz Triage</title>
+  </head>
+  <body>
+    <h1>TLV Fuzz Triage</h1>
+    <p>Runs directory: <code>storage/runs</code></p>
+    <h2>Runs</h2>
+    {% if runs %}
+      <ul>
+      {% for r in runs %}
+        <li>{{ r }}</li>
+      {% endfor %}
+      </ul>
+    {% else %}
+      <p><em>No runs yet.</em></p>
+    {% endif %}
+  </body>
+</html>
