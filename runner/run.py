@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Optional
 
 from runner.mutate import mutate
+from triage.asan import parse_asan_output
 from triage.crash_tag import extract_crash_tag
 from triage.dedup import GlobalDedupIndex, dedup_key_for, sha256_bytes
 
@@ -150,7 +151,16 @@ def main() -> None:
         (crash_dir / "stdout.txt").write_text(out_t, encoding="utf-8")
         (crash_dir / "stderr.txt").write_text(err_t, encoding="utf-8")
 
-        dkey = dedup_key_for(crash_tag, err_t)
+        # Parse ASan output for improved dedup
+        asan_info = parse_asan_output(err_t)
+
+        # Dedup priority: crash_tag > stack_hash > stderr_hash
+        if crash_tag:
+            dkey = f"tag:{crash_tag}"
+        elif asan_info["stack_hash"]:
+            dkey = f"stack:{asan_info['stack_hash']}"
+        else:
+            dkey = dedup_key_for(None, err_t)
 
         # global index uses path relative to repo root for portability
         crash_rel = str(crash_dir).replace("\\", "/")
@@ -189,6 +199,9 @@ def main() -> None:
                     "dedup_key": dkey,
                     "status": status,
                     "representative": hit.representative,
+                    "asan_bug_type": asan_info.get("bug_type"),
+                    "asan_stack_hash": asan_info.get("stack_hash"),
+                    "asan_stack_frames": asan_info.get("stack_frames"),
                 },
             }
             write_json_atomic(crash_dir / "meta.json", meta)
@@ -202,6 +215,8 @@ def main() -> None:
                     "input_sha256": meta["input"]["sha256"],
                     "status": status,
                     "representative": hit.representative,
+                    "asan_bug_type": asan_info.get("bug_type"),
+                    "asan_stack_hash": asan_info.get("stack_hash"),
                 }
             )
             write_json_atomic(index_path, index)
