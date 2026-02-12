@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ crash_id }} - TLV Fuzz Triage</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+      }
+      h1, h2 {
+        color: #333;
+      }
+      .back-link {
+        color: #0066cc;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 20px;
+      }
+      .back-link:hover {
+        text-decoration: underline;
+      }
+      .section {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+      }
+      .section:last-child {
+        border-bottom: none;
+      }
+      .info-grid {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+      .info-label {
+        font-weight: bold;
+        color: #555;
+      }
+      .info-value {
+        color: #333;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 3px;
+        background: #e0e0e0;
+        font-size: 0.9em;
+        margin-right: 5px;
+      }
+      .badge-tag {
+        background: #ffffcc;
+      }
+      .badge-bug {
+        background: #ffcccc;
+        color: #c00;
+      }
+      .code-block {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+        overflow-x: auto;
+        font-family: monospace;
+        font-size: 0.9em;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .download-btn {
+        display: inline-block;
+        padding: 8px 15px;
+        background: #0066cc;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+      .download-btn:hover {
+        background: #0052a3;
+      }
+      .stack-frame {
+        padding: 5px 0;
+        font-family: monospace;
+        font-size: 0.85em;
+        color: #333;
+        border-left: 3px solid #ccc;
+        padding-left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a class="back-link" href="/run/{{ run_id }}">← Back to Run</a>
+      <h1>Crash: {{ crash_id }}</h1>
+      
+      <!-- Overview -->
+      <div class="section">
+        <h2>Overview</h2>
+        <div class="info-grid">
+          <div class="info-label">Crash ID:</div>
+          <div class="info-value">{{ crash_id }}</div>
+          
+          <div class="info-label">Created:</div>
+          <div class="info-value">{{ summary.created_at }}</div>
+          
+          <div class="info-label">Input Size:</div>
+          <div class="info-value">{{ summary.input_size }} bytes</div>
+          
+          <div class="info-label">Tags:</div>
+          <div class="info-value">
+            {% if summary.crash_tag %}
+              <span class="badge badge-tag">{{ summary.crash_tag }}</span>
+            {% endif %}
+            {% if summary.asan_bug_type %}
+              <span class="badge badge-bug">{{ summary.asan_bug_type }}</span>
+            {% endif %}
+          </div>
+          
+          <div class="info-label">Timeout:</div>
+          <div class="info-value">{{ summary.timeout|default("No") }}</div>
+          
+          <div class="info-label">Return Code:</div>
+          <div class="info-value">{{ summary.returncode|default("N/A") }}</div>
+          
+          <div class="info-label">Seed Source:</div>
+          <div class="info-value">{{ summary.seed_source|default("Unknown") }}</div>
+        </div>
+      </div>
+      
+      <!-- Stack Trace -->
+      {% if summary.asan_stack_frames %}
+      <div class="section">
+        <h2>Stack Trace (Top 3 frames)</h2>
+        {% for frame in summary.asan_stack_frames %}
+          <div class="stack-frame">#{{ loop.index-1 }} {{ frame }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      
+      <!-- Downloads -->
+      <div class="section">
+        <h2>Downloads</h2>
+        <a class="download-btn" href="/download/{{ run_id }}/{{ crash_id }}/input.bin">Download Input</a>
+        {% if has_minimized %}
+          <a class="download-btn" href="/download/{{ run_id }}/{{ crash_id }}/minimized.bin">Download Minimized</a>
+        {% endif %}
+      </div>
+      
+      <!-- Reproduction Script -->
+      {% if repro_script_content %}
+      <div class="section">
+        <h2>Reproduction Script</h2>
+        <p><code>./repro.sh</code> - Execute with <code>bash {{ run_id }}/crashes/{{ crash_id }}/repro.sh</code></p>
+        <div class="code-block">{{ repro_script_content }}</div>
+      </div>
+      {% endif %}
+      
+      <!-- Stderr -->
+      {% if stderr_text %}
+      <div class="section">
+        <h2>Stderr Output</h2>
+        <div class="code-block">{{ stderr_text[:5000] }}{% if stderr_text|length > 5000 %} ... (truncated){% endif %}</div>
+      </div>
+      {% endif %}
+      
+      <!-- Stdout -->
+      {% if stdout_text %}
+      <div class="section">
+        <h2>Stdout Output</h2>
+        <div class="code-block">{{ stdout_text[:2000] }}{% if stdout_text|length > 2000 %} ... (truncated){% endif %}</div>
+      </div>
+      {% endif %}
+      
+      <!-- Raw Metadata -->
+      <div class="section">
+        <h2>Metadata (JSON)</h2>
+        <div class="code-block">{{ meta|tojson(indent=2) }}</div>
+      </div>
+    </div>
+  </body>
+</html>
