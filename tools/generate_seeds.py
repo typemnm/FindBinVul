@@ -27,6 +27,11 @@ def build_seeds() -> dict[str, bytes]:
     seed_06 = tlv(0x10, 0x00, bytes.fromhex("00 B0 0B 03 41 42"))
     seed_07 = tlv(0x10, 0x03, bytes.fromhex("99 88 B0 0B 01 5A 00"))
 
+    # Unsafe seeds to exercise crash paths
+    seed_11 = tlv(0x01, 0x80, b"CMD:CRASH" + b"A" * 40)
+    seed_12 = tlv(0x02, 0x80, b"AAAA" + (0).to_bytes(4, "little") * 6)
+    seed_13 = tlv(0x10, 0x80, bytes.fromhex("B0 0B 01"))
+
     seed_08 = (
         tlv(0x01, 0x00, b"HELLO")
         + tlv(0x02, 0x00, (42).to_bytes(4, "little"))
@@ -52,14 +57,22 @@ def build_seeds() -> dict[str, bytes]:
         "seed_08.bin": seed_08,
         "seed_09.bin": seed_09,
         "seed_10.bin": seed_10,
+        "seed_11.bin": seed_11,
+        "seed_12.bin": seed_12,
+        "seed_13.bin": seed_13,
     }
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Generate TLV corpus seeds.")
-    ap.add_argument("--out", default="corpus", help="Output directory (default: corpus)")
+    ap.add_argument("--out", default=None, help="Output directory (default: ../corpus relative to script)")
     args = ap.parse_args()
 
-    out_dir = Path(args.out)
+    if args.out is None:
+        # tools/ 디렉토리의 부모 (프로젝트 루트)를 기준으로 corpus 경로 설정
+        script_dir = Path(__file__).parent
+        out_dir = script_dir.parent / "corpus"
+    else:
+        out_dir = Path(args.out)
     seeds = build_seeds()
     for name, data in seeds.items():
         write_seed(out_dir, name, data)
