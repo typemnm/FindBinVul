@@ -13,6 +13,8 @@ target/build/
 *.a
 *.so
 *.out
+corpus/
+storage/
 
 # Runtime data
 storage/runs/
