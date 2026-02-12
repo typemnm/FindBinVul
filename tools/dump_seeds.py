@@ -124,12 +124,19 @@ def dump_file(path: Path, *, max_depth: int) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Dump/decode TLV seed corpus.")
-    ap.add_argument("paths", nargs="*", default=["corpus/*.bin"], help="Files/globs (default: corpus/*.bin)")
+    ap.add_argument("paths", nargs="*", default=None, help="Files/globs (default: ../corpus/*.bin relative to script)")
     ap.add_argument("--max-depth", type=int, default=4, help="Max nested TLV depth to render (default: 4)")
     args = ap.parse_args()
 
     files: list[str] = []
-    for p in args.paths:
+    paths = args.paths
+    if not paths:
+        # tools/ 디렉토리의 부모를 기준으로 corpus 경로 설정
+        script_dir = Path(__file__).parent
+        corpus_dir = script_dir.parent / "corpus"
+        paths = [str(corpus_dir / "*.bin")]
+    
+    for p in paths:
         files.extend(glob.glob(p))
     files = sorted(set(files))
 

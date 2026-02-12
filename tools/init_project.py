@@ -385,11 +385,16 @@ def write_file(path: Path, content: str, force: bool) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Initialize project skeleton (dirs + basic files).")
-    ap.add_argument("--root", default=".", help="Project root directory (default: current dir)")
+    ap.add_argument("--root", default=None, help="Project root directory (default: ../relative to script)")
     ap.add_argument("--force", action="store_true", help="Overwrite existing files")
     args = ap.parse_args()
 
-    root = Path(args.root).resolve()
+    if args.root is None:
+        # tools/ 디렉토리의 부모를 기준으로 프로젝트 루트 설정
+        script_dir = Path(__file__).parent
+        root = script_dir.parent.resolve()
+    else:
+        root = Path(args.root).resolve()
     print(f"Init project at: {root}")
 
     for d in DIRS:
