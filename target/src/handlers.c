@@ -17,7 +17,7 @@ static uint32_t read_u32le(const uint8_t *p) {
 
 static void crash_tag(const char *tag) {
     ssize_t _r;
-    _r = write(2, "CRASH TAG=", 10);
+    _r = write(2, "CRASH_TAG=", 10);
     _r = write(2, tag, strlen(tag));
     _r = write(2, "\n", 1);
     (void)_r;
@@ -42,7 +42,7 @@ static void handle_type_01(const TlvRecord *r) {
     }
 
     if ((r->flags & F_UNSAFE) &&
-        r->len == 33 &&
+        r->len >= 40 &&
         memcmp(token, "CRASH", 5) == 0) {
 
         crash_tag("T01_STACK_OVERFLOW");
@@ -129,7 +129,7 @@ void handle_record(const TlvRecord *r, Cursor *c, const ParseLimits *limits) {
         tlv_parse_stream(&child, limits);
 
         /* stress path */
-        if ((r->flags & F_UNSAFE) && c->depth == 4) {
+        if ((r->flags & F_UNSAFE) && (c->depth + 1 == limits->max_depth)) {
             crash_tag("T03_NESTED_STRESS");
             tlv_parse_stream(&child, limits);
         }
