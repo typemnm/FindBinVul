@@ -27,4 +27,20 @@
 4. Run dashboard:
    - FLASK_APP=web.app flask run
 
+## One-click fuzz run
+
+Use the wrapper script with built-in presets:
+
+- Conservative (default):
+   - ./run.sh
+   - ./run.sh conservative
+
+- Aggressive:
+   - ./run.sh aggressive
+   - ./run.sh --profile aggressive
+
+Override any runner option directly (appended last):
+
+- ./run.sh conservative --iterations 5000 --seed 3001 --timeout-ms 600
+
 Generated at: 2026-02-09T02:29:33Z

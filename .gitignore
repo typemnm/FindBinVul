@@ -24,3 +24,14 @@ storage/runs/
 .DS_Store
 .vscode/
 .idea/
+.omc/
+
+# Development notes
+docs/adaptive_mutator_v2.md
+docs/design_improvements.md
+docs/phase3_presets.md
+docs/seed_corpus_design_v3.md
+docs/seed_corpus_improvements.md
+docs/test_results_analysis.md
+docs/test_results_analysis_v2.md
+docs/test_results_analysis_v3.md

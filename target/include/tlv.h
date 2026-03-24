@@ -27,4 +27,11 @@ typedef struct {
 
 int tlv_parse_stream(Cursor *c, const ParseLimits *limits);
 
+/* Lightweight in-target coverage hooks for fuzzer feedback. */
+void tlv_cov_reset(void);
+void tlv_cov_event(uint8_t type, uint8_t flags, int depth, uint16_t len, int valid_len);
+uint32_t tlv_cov_unique_edges(void);
+uint32_t tlv_cov_total_hits(void);
+uint64_t tlv_cov_signature(void);
+
 #endif
