@@ -39,7 +39,12 @@ int main(int argc, char **argv) {
     Cursor c = {.buf = buf, .size = size, .off = 0, .depth = 0, .steps = 0};
     ParseLimits limits = {.max_depth = 4, .max_records = 10000, .max_steps = size ? (size * 10) : 10};
 
+    tlv_cov_reset();
     int rc = tlv_parse_stream(&c, &limits);
+    fprintf(stderr, "COV_UNIQUE=%u\n", tlv_cov_unique_edges());
+    fprintf(stderr, "COV_HITS=%u\n", tlv_cov_total_hits());
+    fprintf(stderr, "COV_SIG=%016llx\n", (unsigned long long)tlv_cov_signature());
+
     free(buf);
     return rc == 0 ? 0 : 1;
 }
